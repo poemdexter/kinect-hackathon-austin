@@ -176,7 +176,6 @@ public class KinectInput : MonoBehaviour
         return position.y <= 2.75f && position.y >= -2.75f;
     }
 
-
     public void DetectHamburger(Kinect.Body body, GameObject bodyObject)
     {
         //TODO detect hamburger method. 
@@ -188,7 +187,8 @@ public class KinectInput : MonoBehaviour
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
             if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
             {
-                player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
+                if (NewPositionWithinBounds(leftJointPosition))
+                    player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
             }
             
         }
@@ -202,34 +202,14 @@ public class KinectInput : MonoBehaviour
             //need to pair two joints together to move paddle
             if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
             {
-                player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
+                if (NewPositionWithinBounds(leftJointPosition))
+                    player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y, 0);
             }
         }
-
-
     }
 
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
     {
-        if (body.TrackingId == player1ID)
-        {
-            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
-            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
-            if (NewPositionWithinBounds(leftJointPosition))
-                player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y,0);
-        }
-
-        if (body.TrackingId == player2ID)
-        {
-            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
-            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
-            if (NewPositionWithinBounds(leftJointPosition))
-                player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y,0);
-        }
-
-        
-
-
 
         //if (body.TrackingId == player1ID)
         //{
