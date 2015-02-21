@@ -14,6 +14,14 @@ public class KinectInput : MonoBehaviour
 
     public GameObject player1Paddle, player2Paddle;
 
+    public float burgerMOE = 0.50f;
+    public float handshakeMOE = 0.05f;
+
+    Kinect.Joint leftHandJointP1, rightHandJointP1;
+    Vector3 leftJointPositionP1, rightJointPositionP1;
+    Kinect.Joint leftHandJointP2, rightHandJointP2;
+    Vector3 leftJointPositionP2, rightJointPositionP2;
+
     #region boneMap definition
 
     private Dictionary<Kinect.JointType, Kinect.JointType> boneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
@@ -58,6 +66,7 @@ public class KinectInput : MonoBehaviour
                 kinectSensor.Open();
             }
         }
+
     }
 
     private void OnApplicationQuit()
@@ -166,7 +175,8 @@ public class KinectInput : MonoBehaviour
                 }
 
                 //RefreshBodyObject(body, bodies[body.TrackingId]);
-                DetectHamburger(body, bodies[body.TrackingId]);
+                //DetectHamburger(body, bodies[body.TrackingId]);
+                DetectHandshake(body, bodies[body.TrackingId]);
             }
         }
     }
@@ -178,19 +188,18 @@ public class KinectInput : MonoBehaviour
 
     public void DetectHamburger(Kinect.Body body, GameObject bodyObject)
     {
-        //TODO detect hamburger method. 
         if (body.TrackingId == player1ID)
         {
             Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
+            if (leftJointPosition.y - rightJointPosition.y <= handshakeMOE && leftJointPosition.y - rightJointPosition.y >= -handshakeMOE)
             {
                 if (NewPositionWithinBounds(leftJointPosition))
                     player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
             }
-            
+
         }
 
         if (body.TrackingId == player2ID)
@@ -199,13 +208,43 @@ public class KinectInput : MonoBehaviour
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            //need to pair two joints together to move paddle
-            if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
+            if (leftJointPosition.y - rightJointPosition.y <= burgerMOE && leftJointPosition.y - rightJointPosition.y >= -burgerMOE)
             {
                 if (NewPositionWithinBounds(leftJointPosition))
                     player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y, 0);
             }
         }
+    }
+
+    public void DetectHandshake(Kinect.Body body, GameObject bodyObject)
+    {
+
+        if (body.TrackingId == player1ID)
+        {
+            leftHandJointP1 = body.Joints[Kinect.JointType.HandLeft];
+            rightHandJointP1 = body.Joints[Kinect.JointType.HandRight];
+            leftJointPositionP1 = GetVector3FromJoint(leftHandJointP1);
+            rightJointPositionP1 = GetVector3FromJoint(rightHandJointP1);
+            
+        }
+
+        if (body.TrackingId == player2ID)
+        {
+            leftHandJointP2 = body.Joints[Kinect.JointType.HandLeft];
+            rightHandJointP2 = body.Joints[Kinect.JointType.HandRight];
+            leftJointPositionP2 = GetVector3FromJoint(leftHandJointP2);
+            rightJointPositionP2 = GetVector3FromJoint(rightHandJointP2);
+
+        }
+
+        if (Mathf.Abs(rightJointPositionP2.x - rightJointPositionP1.x) <= handshakeMOE ||
+            Mathf.Abs(leftJointPositionP2.x - leftJointPositionP1.x) <= handshakeMOE
+            )
+        {           
+            Debug.Log("GET READY TO RUMBLE!!!");
+        }
+        
+        
     }
 
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
