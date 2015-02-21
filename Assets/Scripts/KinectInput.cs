@@ -13,9 +13,9 @@ public class KinectInput : MonoBehaviour
     private Body[] bodyData = null;
 
     public GameObject player1Paddle, player2Paddle;
-    
 
     #region boneMap definition
+
     private Dictionary<Kinect.JointType, Kinect.JointType> boneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
         {Kinect.JointType.FootLeft, Kinect.JointType.AnkleLeft},
@@ -43,6 +43,7 @@ public class KinectInput : MonoBehaviour
         {Kinect.JointType.SpineShoulder, Kinect.JointType.Neck},
         {Kinect.JointType.Neck, Kinect.JointType.Head},
     };
+
     #endregion
 
     private void Start()
@@ -169,22 +170,28 @@ public class KinectInput : MonoBehaviour
         }
     }
 
+    private bool NewPositionWithinBounds(Vector3 position)
+    {
+        return position.y <= 2.75f && position.y >= -2.75f;
+    }
+
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
     {
         if (body.TrackingId == player1ID)
         {
             Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
-            player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
+            if (NewPositionWithinBounds(leftJointPosition))
+                player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y,0);
         }
 
         if (body.TrackingId == player2ID)
         {
             Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
-            player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y, 0);
+            if (NewPositionWithinBounds(leftJointPosition))
+                player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y,0);
         }
-
 
 
         //if (body.TrackingId == player1ID)
@@ -417,6 +424,6 @@ public class KinectInput : MonoBehaviour
 
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
     {
-        return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
+        return new Vector3(joint.Position.X*10, joint.Position.Y*10, joint.Position.Z*10);
     }
 }
