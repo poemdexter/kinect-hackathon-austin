@@ -165,7 +165,8 @@ public class KinectInput : MonoBehaviour
                     }
                 }
 
-                RefreshBodyObject(body, bodies[body.TrackingId]);
+                //RefreshBodyObject(body, bodies[body.TrackingId]);
+                DetectHamburger(body, bodies[body.TrackingId]);
             }
         }
     }
@@ -173,6 +174,39 @@ public class KinectInput : MonoBehaviour
     private bool NewPositionWithinBounds(Vector3 position)
     {
         return position.y <= 2.75f && position.y >= -2.75f;
+    }
+
+
+    public void DetectHamburger(Kinect.Body body, GameObject bodyObject)
+    {
+        //TODO detect hamburger method. 
+        if (body.TrackingId == player1ID)
+        {
+            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
+            Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
+            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
+            Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
+            if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
+            {
+                player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
+            }
+            
+        }
+
+        if (body.TrackingId == player2ID)
+        {
+            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
+            Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
+            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
+            Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
+            //need to pair two joints together to move paddle
+            if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
+            {
+                player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
+            }
+        }
+
+
     }
 
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
@@ -192,6 +226,9 @@ public class KinectInput : MonoBehaviour
             if (NewPositionWithinBounds(leftJointPosition))
                 player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y,0);
         }
+
+        
+
 
 
         //if (body.TrackingId == player1ID)
