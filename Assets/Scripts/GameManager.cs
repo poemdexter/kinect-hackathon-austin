@@ -1,15 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
+
+public enum GameState
+{
+    PlayerSelect,
+    Handshake,
+    Instructions,
+    GamePlay
+}
 
 public class GameManager : MonoBehaviour
 {
     public GameObject ball;
+    private GameState currentState;
+    public Text p1Text, p2Text;
 
     private int player1Score, player2Score;
 
     private void Start()
     {
-        ball.GetComponent<BallMovement>().Play();
+        currentState = GameState.PlayerSelect;
+    }
+
+    public GameState GetCurrentState()
+    {
+        return currentState;
     }
 
     public void Scored(int player)
@@ -25,5 +41,14 @@ public class GameManager : MonoBehaviour
     {
         ball.GetComponent<BallMovement>().Reset();
         ball.GetComponent<BallMovement>().Play();
+    }
+
+    private void Update()
+    {
+        if (currentState == GameState.PlayerSelect)
+        {
+            p1Text.text = "P1";
+            p2Text.text = "P2";
+        }
     }
 }

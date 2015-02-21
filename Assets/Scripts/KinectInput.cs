@@ -12,7 +12,12 @@ public class KinectInput : MonoBehaviour
     private BodyFrameReader bodyFrameReader;
     private Body[] bodyData = null;
 
+    public GameManager gameManager;
     public GameObject player1Paddle, player2Paddle;
+
+    private GameObject p1Select, p2Select;
+    public GameObject selectObject;
+
 
     #region boneMap definition
 
@@ -165,8 +170,18 @@ public class KinectInput : MonoBehaviour
                     }
                 }
 
-                //RefreshBodyObject(body, bodies[body.TrackingId]);
-                DetectHamburger(body, bodies[body.TrackingId]);
+                if (gameManager.GetCurrentState() == GameState.PlayerSelect)
+                {
+                    DetectPlayerSelect(body, bodies[body.TrackingId]);
+                }
+                else if (gameManager.GetCurrentState() == GameState.Handshake)
+                {
+                    
+                }
+                else
+                {
+                    DetectHamburger(body, bodies[body.TrackingId]);
+                }
             }
         }
     }
@@ -176,21 +191,56 @@ public class KinectInput : MonoBehaviour
         return position.y <= 2.75f && position.y >= -2.75f;
     }
 
-    public void DetectHamburger(Kinect.Body body, GameObject bodyObject)
+    private void DetectPlayerSelect(Kinect.Body body, GameObject bodyObject)
     {
-        //TODO detect hamburger method. 
+        if (body.TrackingId == player1ID)
+        {
+            Kinect.Joint headJoint = body.Joints[Kinect.JointType.Head];
+            Vector3 headPosition = GetVector3FromJoint(headJoint);
+
+            if (p1Select == null)
+            {
+                p1Select = (GameObject)Instantiate(selectObject, headPosition, Quaternion.identity);
+                p1Select.GetComponent<SpriteRenderer>().color = new Color(255f, 0f, 0f);
+            }
+            else
+            {
+                p1Select.transform.position = headPosition;
+            }
+        }
+
+        if (body.TrackingId == player2ID)
+        {
+            Kinect.Joint headJoint = body.Joints[Kinect.JointType.Head];
+            Vector3 headPosition = GetVector3FromJoint(headJoint);
+
+            if (p2Select == null)
+            {
+                p2Select = (GameObject)Instantiate(selectObject, headPosition, Quaternion.identity);
+                p2Select.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 255f);
+            }
+            else
+            {
+                p2Select.transform.position = headPosition;
+            }
+        }
+    }
+
+    private void DetectHamburger(Kinect.Body body, GameObject bodyObject)
+    {
         if (body.TrackingId == player1ID)
         {
             Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
+            if (leftJointPosition.y - rightJointPosition.y <= 0.25 &&
+                leftJointPosition.y - rightJointPosition.y >= -0.25)
             {
                 if (NewPositionWithinBounds(leftJointPosition))
-                    player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
+                    player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x,
+                        leftJointPosition.y, 0);
             }
-            
         }
 
         if (body.TrackingId == player2ID)
@@ -199,18 +249,18 @@ public class KinectInput : MonoBehaviour
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            //need to pair two joints together to move paddle
-            if (leftJointPosition.y - rightJointPosition.y <= 0.25 && leftJointPosition.y - rightJointPosition.y >= -0.25)
+            if (leftJointPosition.y - rightJointPosition.y <= 0.25 &&
+                leftJointPosition.y - rightJointPosition.y >= -0.25)
             {
                 if (NewPositionWithinBounds(leftJointPosition))
-                    player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y, 0);
+                    player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
+                        leftJointPosition.y, 0);
             }
         }
     }
 
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
     {
-
         //if (body.TrackingId == player1ID)
         //{
         //    if (body.HandLeftConfidence == TrackingConfidence.High)
@@ -441,6 +491,6 @@ public class KinectInput : MonoBehaviour
 
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
     {
-        return new Vector3(joint.Position.X*10, joint.Position.Y*10, joint.Position.Z*10);
+        return new Vector3(joint.Position.X*5, joint.Position.Y*5, joint.Position.Z*5);
     }
 }
