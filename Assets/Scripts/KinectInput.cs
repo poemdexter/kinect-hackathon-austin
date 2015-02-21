@@ -6,11 +6,13 @@ using Kinect = Windows.Kinect;
 public class KinectInput : MonoBehaviour
 {
     private ulong player1ID, player2ID;
-    private bool p1ReadyForID, p2ReadyForID;
+    private bool p1ReadyForID = true, p2ReadyForID = true;
     private Dictionary<ulong, GameObject> bodies = new Dictionary<ulong, GameObject>();
     private KinectSensor kinectSensor;
     private BodyFrameReader bodyFrameReader;
     private Body[] bodyData = null;
+
+    public GameObject player1Paddle, player2Paddle;
     
 
     #region boneMap definition
@@ -83,12 +85,12 @@ public class KinectInput : MonoBehaviour
                 {
                     bodyData = new Body[kinectSensor.BodyFrameSource.BodyCount];
                 }
-            }
 
-            // refresh the body data based on current frame
-            frame.GetAndRefreshBodyData(bodyData);
-            frame.Dispose();
-            frame = null;
+                // refresh the body data based on current frame
+                frame.GetAndRefreshBodyData(bodyData);
+                frame.Dispose();
+                frame = null;
+            }
         }
 
         if (bodyData == null)
@@ -149,12 +151,14 @@ public class KinectInput : MonoBehaviour
                     // to lock bodies to players
                     if (body.TrackingId != player2ID && p1ReadyForID)
                     {
+                        Debug.Log("tracking player 1");
                         player1ID = body.TrackingId;
                         p1ReadyForID = false;
                     }
 
                     else if (body.TrackingId != player1ID && p2ReadyForID)
                     {
+                        Debug.Log("tracking player 2");
                         player2ID = body.TrackingId;
                         p2ReadyForID = false;
                     }
@@ -167,6 +171,22 @@ public class KinectInput : MonoBehaviour
 
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
     {
+        if (body.TrackingId == player1ID)
+        {
+            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
+            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
+            player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, leftJointPosition.y, 0);
+        }
+
+        if (body.TrackingId == player2ID)
+        {
+            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
+            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
+            player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x, leftJointPosition.y, 0);
+        }
+
+
+
         //if (body.TrackingId == player1ID)
         //{
         //    if (body.HandLeftConfidence == TrackingConfidence.High)
