@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
 
     public void NextRound()
     {
-        currentRuleNumber++;
+        GetNextRuleNumber();
         GetNextRule();
         currentState = GameState.Instructions;
         ballSpawned = false;
