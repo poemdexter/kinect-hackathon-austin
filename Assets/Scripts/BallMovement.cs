@@ -6,6 +6,7 @@ public class BallMovement : MonoBehaviour
     public float startSpeed;
     public float speedIncreaseAmount;
     private float currentSpeed;
+    public float maxSpeed;
 
     public void Reset()
     {
@@ -22,6 +23,10 @@ public class BallMovement : MonoBehaviour
 
     public void IncreaseSpeed()
     {
-        rigidbody2D.velocity = rigidbody2D.velocity + (rigidbody2D.velocity*speedIncreaseAmount);
+        Vector2 newSpeed = rigidbody2D.velocity + (rigidbody2D.velocity * speedIncreaseAmount);
+        if (newSpeed.magnitude < maxSpeed)
+        {
+            rigidbody2D.velocity = newSpeed;
+        }
     }
 }

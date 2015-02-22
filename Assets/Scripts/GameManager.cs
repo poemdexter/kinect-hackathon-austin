@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     private Rules currentRule;
     public Text p1Text, p2Text, infoText, instructionText;
     private bool playersSelected = false;
+    private bool showingInstructions = false;
+    private bool ballSpawned = false;
 
     private int player1Score, player2Score;
 
@@ -51,6 +53,13 @@ public class GameManager : MonoBehaviour
         currentState = GameState.Handshake;
     }
 
+    IEnumerator WaitForTimeToStart(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        currentState = GameState.GamePlay;
+        showingInstructions = false;
+    }
+
     public void HandsShook()
     {
         currentRule = Rules.Pong;
@@ -62,14 +71,15 @@ public class GameManager : MonoBehaviour
         Debug.Log("player scored: " + player);
         if (player == 1) player1Score++;
         if (player == 2) player2Score++;
-
+        p1Text.text = player1Score.ToString();
+        p2Text.text = player2Score.ToString();
         NextRound();
     }
 
     public void NextRound()
     {
-        ball.GetComponent<BallMovement>().Reset();
-        ball.GetComponent<BallMovement>().Play();
+        currentState = GameState.Instructions;
+        ballSpawned = false;
     }
 
     private void Update()
@@ -89,6 +99,21 @@ public class GameManager : MonoBehaviour
             infoText.enabled = false;
             instructionText.enabled = true;
             instructionText.text = GetInstructions();
+            if (!showingInstructions)
+            {
+                StartCoroutine(WaitForTimeToStart(5));
+                showingInstructions = true;
+            }
+        }
+        else if (currentState == GameState.GamePlay)
+        {
+            instructionText.enabled = false;
+            if (!ballSpawned)
+            {
+                ballSpawned = true;
+                GameObject sportball = (GameObject)Instantiate(ball);
+                sportball.GetComponent<BallMovement>().Play();
+            }
         }
     }
 

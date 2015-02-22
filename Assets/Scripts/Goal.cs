@@ -9,5 +9,6 @@ public class Goal : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D col)
     {
         gameManager.Scored(playerScored);
+        Destroy(col.gameObject);
     }
 }
