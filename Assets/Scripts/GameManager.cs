@@ -21,10 +21,12 @@ public class GameManager : MonoBehaviour
     public GameObject ball;
     private GameState currentState;
     private Rules currentRule;
+    private int currentRuleNumber;
     public Text p1Text, p2Text, infoText, instructionText;
     private bool playersSelected = false;
     private bool showingInstructions = false;
     private bool ballSpawned = false;
+    private const int numberOfRules = 2;
 
     private int player1Score, player2Score;
 
@@ -63,6 +65,7 @@ public class GameManager : MonoBehaviour
     public void HandsShook()
     {
         currentRule = Rules.Pong;
+        currentRuleNumber = 1;
         currentState = GameState.Instructions;
     }
 
@@ -78,8 +81,41 @@ public class GameManager : MonoBehaviour
 
     public void NextRound()
     {
+        currentRuleNumber++;
+        GetNextRule();
         currentState = GameState.Instructions;
         ballSpawned = false;
+    }
+
+    private void GetNextRuleNumber()
+    {
+        if (currentRuleNumber + 1 > numberOfRules)
+        {
+            currentRuleNumber = 1;
+        }
+        else
+        {
+            currentRuleNumber++;
+        }
+
+    }
+
+    private void GetNextRule()
+    {
+        switch (currentRuleNumber)
+        {
+            case 1:
+                currentRule = Rules.Pong;
+                break;
+            case 2:
+                currentRule = Rules.Burger;
+                break;
+        }
+    }
+
+    public Rules GetCurrentRule()
+    {
+        return currentRule;
     }
 
     private void Update()

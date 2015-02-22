@@ -194,9 +194,18 @@ public class KinectInput : MonoBehaviour
                 }
                 else if (gameManager.GetCurrentState() == GameState.GamePlay)
                 {
-                    DetectNormalPong(body, bodies[body.TrackingId]);
-                    //DetectHamburger(body, bodies[body.TrackingId]);
-                    //DetectTexan(body, bodies[body.TrackingId]);
+                    switch (gameManager.GetCurrentRule())
+                    {
+                        case Rules.Pong:
+                            DetectNormalPong(body, bodies[body.TrackingId]);
+                            break;
+                        case Rules.Burger:
+                            DetectHamburger(body, bodies[body.TrackingId]);
+                            break;
+                        //case Rules.Texan:
+                        //    DetectTexan(body, bodies[body.TrackingId]);
+                        //    break;
+                    }
                 }
             }
         }
