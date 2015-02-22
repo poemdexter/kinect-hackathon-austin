@@ -198,15 +198,14 @@ public class KinectInput : MonoBehaviour
                     switch (gameManager.GetCurrentRule())
                     {
                         case Rules.Pong:
-                            DetectTexan(body, bodies[body.TrackingId]);
-                            //DetectNormalPong(body, bodies[body.TrackingId]);
+                            DetectNormalPong(body, bodies[body.TrackingId]);
                             break;
                         case Rules.Burger:
                             DetectHamburger(body, bodies[body.TrackingId]);
                             break;
-                        //case Rules.Texan:
-                        //    DetectTexan(body, bodies[body.TrackingId]);
-                        //    break;
+                        case Rules.Texan:
+                            DetectTexan(body, bodies[body.TrackingId]);
+                            break;
                     }
                 }
             }
@@ -234,7 +233,7 @@ public class KinectInput : MonoBehaviour
 
         if (selectHeadPosition1 != Vector3.zero && selectHeadPosition2 != Vector3.zero)
         {
-            if (selectHeadPosition1.x > selectHeadPosition2.x) 
+            if (selectHeadPosition1.x > selectHeadPosition2.x)
             {
                 // players inversed, need to swap
                 ulong temp = player1ID;
@@ -287,25 +286,25 @@ public class KinectInput : MonoBehaviour
             leftJointPositionP1 = GetVector3FromJoint(leftHandJointP1);
             rightJointPositionP1 = GetVector3FromJoint(rightHandJointP1);
             float handDiff = Mathf.Abs(rightJointPositionP1.y - leftJointPositionP1.y);
-
             if (rightJointPositionP1.y > leftJointPositionP1.y)
             {
-                if (NewPositionWithinBounds(leftJointPositionP1))
+                Vector3 newPos = new Vector3(player1Paddle.transform.position.x,
+                    player1Paddle.transform.position.y + handDiff*.05f, 0);
+                if (NewPositionWithinBounds(newPos))
                 {
-                    player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x,
-                        player1Paddle.transform.position.y + handDiff, 0);
+                    player1Paddle.transform.position = newPos;
                 }
             }
 
             if (rightJointPositionP1.y < leftJointPositionP1.y)
             {
-                if (NewPositionWithinBounds(leftJointPositionP1))
+                Vector3 newPos = new Vector3(player1Paddle.transform.position.x,
+                    player1Paddle.transform.position.y - handDiff*.05f, 0);
+                if (NewPositionWithinBounds(newPos))
                 {
-                    player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, 
-                        player1Paddle.transform.position.y - handDiff,0);
+                    player1Paddle.transform.position = newPos;
                 }
             }
-
         }
 
         if (body.TrackingId == player2ID)
@@ -314,11 +313,25 @@ public class KinectInput : MonoBehaviour
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            if (leftJointPosition.y - rightJointPosition.y <= texanMOE && leftJointPosition.y - rightJointPosition.y >= -texanMOE)
+            float handDiff = Mathf.Abs(rightJointPosition.y - leftJointPosition.y);
+            if (rightJointPosition.y > leftJointPosition.y)
             {
-                if (NewPositionWithinBounds(leftJointPosition))
-                    player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
-                        leftJointPosition.y, 0);
+                Vector3 newPos = new Vector3(player2Paddle.transform.position.x,
+                    player2Paddle.transform.position.y + handDiff*.1f, 0);
+                if (NewPositionWithinBounds(newPos))
+                {
+                    player2Paddle.transform.position = newPos;
+                }
+            }
+
+            if (rightJointPosition.y < leftJointPosition.y)
+            {
+                Vector3 newPos = new Vector3(player2Paddle.transform.position.x,
+                    player2Paddle.transform.position.y - handDiff*.1f, 0);
+                if (NewPositionWithinBounds(newPos))
+                {
+                    player2Paddle.transform.position = newPos;
+                }
             }
         }
     }
@@ -329,13 +342,12 @@ public class KinectInput : MonoBehaviour
         {
             Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
-            
+
             if (NewPositionWithinBounds(leftJointPosition))
             {
                 player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x,
-                        leftJointPosition.y, 0);
+                    leftJointPosition.y, 0);
             }
-                    
         }
 
         if (body.TrackingId == player2ID)
@@ -347,7 +359,7 @@ public class KinectInput : MonoBehaviour
             {
                 player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
                     rightJointPosition.y, 0);
-            }                
+            }
         }
     }
 

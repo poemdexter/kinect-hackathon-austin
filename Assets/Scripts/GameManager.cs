@@ -7,13 +7,15 @@ public enum GameState
     PlayerSelect,
     Handshake,
     Instructions,
-    GamePlay
+    GamePlay,
+    Winner
 }
 
 public enum Rules
 {
     Pong,
-    Burger
+    Burger,
+    Texan
 }
 
 public class GameManager : MonoBehaviour
@@ -26,14 +28,15 @@ public class GameManager : MonoBehaviour
     private bool playersSelected = false;
     private bool showingInstructions = false;
     private bool ballSpawned = false;
-    private const int numberOfRules = 2;
+    private const int numberOfRules = 3;
+    private int winScore = 3;
+    private int winner = 0;
 
     private int player1Score, player2Score;
 
     private void Start()
     {
         currentState = GameState.PlayerSelect;
-        //currentState = GameState.GamePlay;
     }
 
     public GameState GetCurrentState()
@@ -75,9 +78,19 @@ public class GameManager : MonoBehaviour
         Debug.Log("player scored: " + player);
         if (player == 1) player1Score++;
         if (player == 2) player2Score++;
+        if (player1Score >= winScore)
+            Winner(1);
+        else if (player2Score >= winScore)
+            Winner(2);
         p1Text.text = player1Score.ToString();
         p2Text.text = player2Score.ToString();
         NextRound();
+    }
+
+    private void Winner(int player)
+    {
+        currentState = GameState.Winner;
+        winner = player;
     }
 
     public void NextRound()
@@ -110,6 +123,9 @@ public class GameManager : MonoBehaviour
                 break;
             case 2:
                 currentRule = Rules.Burger;
+                break;
+            case 3:
+                currentRule = Rules.Texan;
                 break;
         }
     }
@@ -152,6 +168,11 @@ public class GameManager : MonoBehaviour
                 sportball.GetComponent<BallMovement>().Play();
             }
         }
+        else if (currentState == GameState.Winner)
+        {
+            instructionText.enabled = true;
+            instructionText.text = "PONGEMONIUM CHAMPION PLAYER " + winner;
+        }
     }
 
     private string GetInstructions()
@@ -162,6 +183,8 @@ public class GameManager : MonoBehaviour
                 return "the rule: a game like pong use hands to move paddle";
             case Rules.Burger:
                 return "new rule: hold hands together near mouth like eating champion burger";
+            case Rules.Texan:
+                return "new rule: shoot gun in air for great victory";
         }
         return "foul";
     }
