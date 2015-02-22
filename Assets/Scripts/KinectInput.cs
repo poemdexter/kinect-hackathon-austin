@@ -194,8 +194,11 @@ public class KinectInput : MonoBehaviour
                 }
                 else
                 {
-                    DetectHamburger(body, bodies[body.TrackingId]);
+                    //DetectHamburger(body, bodies[body.TrackingId]);
+                    DetectNormalPong(body, bodies[body.TrackingId]);
                 }
+
+                //DetectTexan(body, bodies[body.TrackingId]);
             }
         }
     }
@@ -262,6 +265,67 @@ public class KinectInput : MonoBehaviour
                     player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
                         leftJointPosition.y, 0);
             }
+        }
+    }
+
+    private void DetectTexan(Kinect.Body body, GameObject bodyObject)
+    {
+        if (body.TrackingId == player1ID)
+        {
+            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
+            Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
+            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
+            Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
+
+            if (leftJointPosition.y - rightJointPosition.y <= handshakeMOE && leftJointPosition.y - rightJointPosition.y >= -handshakeMOE)
+            {
+                if (NewPositionWithinBounds(leftJointPosition))
+                    player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x,
+                        leftJointPosition.y, 0);
+            }
+
+        }
+
+        if (body.TrackingId == player2ID)
+        {
+            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
+            Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
+            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
+            Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
+            if (leftJointPosition.y - rightJointPosition.y <= burgerMOE && leftJointPosition.y - rightJointPosition.y >= -burgerMOE)
+            {
+                if (NewPositionWithinBounds(leftJointPosition))
+                    player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
+                        leftJointPosition.y, 0);
+            }
+        }
+    }
+
+    public void DetectNormalPong(Kinect.Body body, GameObject bodyObject)
+    {
+        if (body.TrackingId == player1ID)
+        {
+            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
+            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
+            
+            if (NewPositionWithinBounds(leftJointPosition))
+            {
+                player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x,
+                        leftJointPosition.y, 0);
+            }
+                    
+        }
+
+        if (body.TrackingId == player2ID)
+        {
+            Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
+            Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
+
+            if (NewPositionWithinBounds(rightJointPosition))
+            {
+                player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
+                    rightJointPosition.y, 0);
+            }                
         }
     }
 
