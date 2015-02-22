@@ -5,6 +5,7 @@ public class PaddleCollision : MonoBehaviour
 {
     private void OnCollisionEnter2D(Collision2D col)
     {
-        col.gameObject.GetComponent<BallMovement>().IncreaseSpeed();
+        if (col.gameObject.CompareTag("ball"))
+            col.gameObject.GetComponent<BallMovement>().IncreaseSpeed();
     }
 }

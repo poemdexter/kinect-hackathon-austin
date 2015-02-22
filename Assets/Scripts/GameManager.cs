@@ -10,11 +10,19 @@ public enum GameState
     GamePlay
 }
 
+public enum Rules
+{
+    Pong,
+    Burger
+}
+
 public class GameManager : MonoBehaviour
 {
     public GameObject ball;
     private GameState currentState;
-    public Text p1Text, p2Text;
+    private Rules currentRule;
+    public Text p1Text, p2Text, infoText, instructionText;
+    private bool playersSelected = false;
 
     private int player1Score, player2Score;
 
@@ -26,6 +34,27 @@ public class GameManager : MonoBehaviour
     public GameState GetCurrentState()
     {
         return currentState;
+    }
+
+    public void PlayersSelected()
+    {
+        if (!playersSelected)
+        {
+            StartCoroutine(WaitForTime(2f));
+        }
+        playersSelected = true;
+    }
+
+    IEnumerator WaitForTime(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        currentState = GameState.Handshake;
+    }
+
+    public void HandsShook()
+    {
+        currentRule = Rules.Pong;
+        currentState = GameState.Instructions;
     }
 
     public void Scored(int player)
@@ -47,8 +76,31 @@ public class GameManager : MonoBehaviour
     {
         if (currentState == GameState.PlayerSelect)
         {
-            p1Text.text = "P1";
-            p2Text.text = "P2";
+            infoText.text = "PONGEMONIUM SPORTS GAME";
         }
+        else if (currentState == GameState.Handshake)
+        {
+            infoText.text = "shake hands for good sport";
+        }
+        else if (currentState == GameState.Instructions)
+        {
+            p1Text.enabled = true;
+            p2Text.enabled = true;
+            infoText.enabled = false;
+            instructionText.enabled = true;
+            instructionText.text = GetInstructions();
+        }
+    }
+
+    private string GetInstructions()
+    {
+        switch (currentRule)
+        {
+            case Rules.Pong:
+                return "the rule: a game like pong use hands to move paddle";
+            case Rules.Burger:
+                return "new rule: hold hands together near mouth like eating champion burger";
+        }
+        return "foul";
     }
 }

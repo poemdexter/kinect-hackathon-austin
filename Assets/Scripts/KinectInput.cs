@@ -22,10 +22,12 @@ public class KinectInput : MonoBehaviour
     public float burgerMOE = 0.50f;
     public float handshakeMOE = 0.05f;
 
-    Kinect.Joint leftHandJointP1, rightHandJointP1;
-    Vector3 leftJointPositionP1, rightJointPositionP1;
-    Kinect.Joint leftHandJointP2, rightHandJointP2;
-    Vector3 leftJointPositionP2, rightJointPositionP2;
+    private Kinect.Joint leftHandJointP1, rightHandJointP1;
+    private Vector3 leftJointPositionP1, rightJointPositionP1;
+    private Kinect.Joint leftHandJointP2, rightHandJointP2;
+    private Vector3 leftJointPositionP2, rightJointPositionP2;
+
+    private Vector3 selectHeadPosition1, selectHeadPosition2;
 
     #region boneMap definition
 
@@ -71,7 +73,6 @@ public class KinectInput : MonoBehaviour
                 kinectSensor.Open();
             }
         }
-
     }
 
     private void OnApplicationQuit()
@@ -185,6 +186,10 @@ public class KinectInput : MonoBehaviour
                 }
                 else if (gameManager.GetCurrentState() == GameState.Handshake)
                 {
+                    DetectHandshake(body, bodies[body.TrackingId]);
+                }
+                else if (gameManager.GetCurrentState() == GameState.Instructions)
+                {
                     
                 }
                 else
@@ -205,33 +210,25 @@ public class KinectInput : MonoBehaviour
         if (body.TrackingId == player1ID)
         {
             Kinect.Joint headJoint = body.Joints[Kinect.JointType.Head];
-            Vector3 headPosition = GetVector3FromJoint(headJoint);
-
-            if (p1Select == null)
-            {
-                p1Select = (GameObject)Instantiate(selectObject, headPosition, Quaternion.identity);
-                p1Select.GetComponent<SpriteRenderer>().color = new Color(255f, 0f, 0f);
-            }
-            else
-            {
-                p1Select.transform.position = headPosition;
-            }
+            selectHeadPosition1 = GetVector3FromJoint(headJoint);
         }
 
         if (body.TrackingId == player2ID)
         {
             Kinect.Joint headJoint = body.Joints[Kinect.JointType.Head];
-            Vector3 headPosition = GetVector3FromJoint(headJoint);
+            selectHeadPosition2 = GetVector3FromJoint(headJoint);
+        }
 
-            if (p2Select == null)
+        if (selectHeadPosition1 != Vector3.zero && selectHeadPosition2 != Vector3.zero)
+        {
+            if (selectHeadPosition1.x > selectHeadPosition2.x) 
             {
-                p2Select = (GameObject)Instantiate(selectObject, headPosition, Quaternion.identity);
-                p2Select.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 255f);
+                // players inversed, need to swap
+                ulong temp = player1ID;
+                player1ID = player2ID;
+                player2ID = temp;
             }
-            else
-            {
-                p2Select.transform.position = headPosition;
-            }
+            gameManager.PlayersSelected();
         }
     }
 
@@ -243,13 +240,13 @@ public class KinectInput : MonoBehaviour
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            if (leftJointPosition.y - rightJointPosition.y <= handshakeMOE && leftJointPosition.y - rightJointPosition.y >= -handshakeMOE)
+            if (leftJointPosition.y - rightJointPosition.y <= handshakeMOE &&
+                leftJointPosition.y - rightJointPosition.y >= -handshakeMOE)
             {
                 if (NewPositionWithinBounds(leftJointPosition))
                     player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x,
                         leftJointPosition.y, 0);
             }
-
         }
 
         if (body.TrackingId == player2ID)
@@ -258,7 +255,8 @@ public class KinectInput : MonoBehaviour
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            if (leftJointPosition.y - rightJointPosition.y <= burgerMOE && leftJointPosition.y - rightJointPosition.y >= -burgerMOE)
+            if (leftJointPosition.y - rightJointPosition.y <= burgerMOE &&
+                leftJointPosition.y - rightJointPosition.y >= -burgerMOE)
             {
                 if (NewPositionWithinBounds(leftJointPosition))
                     player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
@@ -269,14 +267,12 @@ public class KinectInput : MonoBehaviour
 
     public void DetectHandshake(Kinect.Body body, GameObject bodyObject)
     {
-
         if (body.TrackingId == player1ID)
         {
             leftHandJointP1 = body.Joints[Kinect.JointType.HandLeft];
             rightHandJointP1 = body.Joints[Kinect.JointType.HandRight];
             leftJointPositionP1 = GetVector3FromJoint(leftHandJointP1);
             rightJointPositionP1 = GetVector3FromJoint(rightHandJointP1);
-            
         }
 
         if (body.TrackingId == player2ID)
@@ -285,17 +281,13 @@ public class KinectInput : MonoBehaviour
             rightHandJointP2 = body.Joints[Kinect.JointType.HandRight];
             leftJointPositionP2 = GetVector3FromJoint(leftHandJointP2);
             rightJointPositionP2 = GetVector3FromJoint(rightHandJointP2);
-
         }
 
         if (Mathf.Abs(rightJointPositionP2.x - rightJointPositionP1.x) <= handshakeMOE ||
-            Mathf.Abs(leftJointPositionP2.x - leftJointPositionP1.x) <= handshakeMOE
-            )
-        {           
-            Debug.Log("GET READY TO RUMBLE!!!");
+            Mathf.Abs(leftJointPositionP2.x - leftJointPositionP1.x) <= handshakeMOE)
+        {
+            gameManager.HandsShook();
         }
-        
-        
     }
 
     private void RefreshBodyObject(Kinect.Body body, GameObject bodyObject)
