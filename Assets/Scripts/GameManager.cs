@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         currentState = GameState.PlayerSelect;
+        //currentState = GameState.GamePlay;
     }
 
     public GameState GetCurrentState()

@@ -20,7 +20,8 @@ public class KinectInput : MonoBehaviour
 
 
     public float burgerMOE = 0.50f;
-    public float handshakeMOE = 0.05f;
+    public float texanMOE = 0.50f;
+    public float handshakeMOE = 0.15f;
 
     private Kinect.Joint leftHandJointP1, rightHandJointP1;
     private Vector3 leftJointPositionP1, rightJointPositionP1;
@@ -197,7 +198,8 @@ public class KinectInput : MonoBehaviour
                     switch (gameManager.GetCurrentRule())
                     {
                         case Rules.Pong:
-                            DetectNormalPong(body, bodies[body.TrackingId]);
+                            DetectTexan(body, bodies[body.TrackingId]);
+                            //DetectNormalPong(body, bodies[body.TrackingId]);
                             break;
                         case Rules.Burger:
                             DetectHamburger(body, bodies[body.TrackingId]);
@@ -280,16 +282,28 @@ public class KinectInput : MonoBehaviour
     {
         if (body.TrackingId == player1ID)
         {
-            Kinect.Joint leftHandJoint = body.Joints[Kinect.JointType.HandLeft];
-            Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
-            Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
-            Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
+            leftHandJointP1 = body.Joints[Kinect.JointType.HandLeft];
+            rightHandJointP1 = body.Joints[Kinect.JointType.HandRight];
+            leftJointPositionP1 = GetVector3FromJoint(leftHandJointP1);
+            rightJointPositionP1 = GetVector3FromJoint(rightHandJointP1);
+            float handDiff = Mathf.Abs(rightJointPositionP1.y - leftJointPositionP1.y);
 
-            if (leftJointPosition.y - rightJointPosition.y <= handshakeMOE && leftJointPosition.y - rightJointPosition.y >= -handshakeMOE)
+            if (rightJointPositionP1.y > leftJointPositionP1.y)
             {
-                if (NewPositionWithinBounds(leftJointPosition))
+                if (NewPositionWithinBounds(leftJointPositionP1))
+                {
                     player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x,
-                        leftJointPosition.y, 0);
+                        player1Paddle.transform.position.y + handDiff, 0);
+                }
+            }
+
+            if (rightJointPositionP1.y < leftJointPositionP1.y)
+            {
+                if (NewPositionWithinBounds(leftJointPositionP1))
+                {
+                    player1Paddle.transform.position = new Vector3(player1Paddle.transform.position.x, 
+                        player1Paddle.transform.position.y - handDiff,0);
+                }
             }
 
         }
@@ -300,7 +314,7 @@ public class KinectInput : MonoBehaviour
             Kinect.Joint rightHandJoint = body.Joints[Kinect.JointType.HandRight];
             Vector3 leftJointPosition = GetVector3FromJoint(leftHandJoint);
             Vector3 rightJointPosition = GetVector3FromJoint(rightHandJoint);
-            if (leftJointPosition.y - rightJointPosition.y <= burgerMOE && leftJointPosition.y - rightJointPosition.y >= -burgerMOE)
+            if (leftJointPosition.y - rightJointPosition.y <= texanMOE && leftJointPosition.y - rightJointPosition.y >= -texanMOE)
             {
                 if (NewPositionWithinBounds(leftJointPosition))
                     player2Paddle.transform.position = new Vector3(player2Paddle.transform.position.x,
