@@ -154,7 +154,7 @@ public class GameManager : MonoBehaviour
             instructionText.text = GetInstructions();
             if (!showingInstructions)
             {
-                StartCoroutine(WaitForTimeToStart(5));
+                StartCoroutine(WaitForTimeToStart(10));
                 showingInstructions = true;
             }
         }
