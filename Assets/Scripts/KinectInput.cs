@@ -18,6 +18,7 @@ public class KinectInput : MonoBehaviour
     private GameObject p1Select, p2Select;
     public GameObject selectObject;
 
+    public float maxDistanceForPlayer = 6f;
 
     public float burgerMOE = 0.50f;
     public float texanMOE = 0.50f;
@@ -29,38 +30,6 @@ public class KinectInput : MonoBehaviour
     private Vector3 leftJointPositionP2, rightJointPositionP2;
 
     private Vector3 selectHeadPosition1, selectHeadPosition2;
-
-    #region boneMap definition
-
-    private Dictionary<Kinect.JointType, Kinect.JointType> boneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
-    {
-        {Kinect.JointType.FootLeft, Kinect.JointType.AnkleLeft},
-        {Kinect.JointType.AnkleLeft, Kinect.JointType.KneeLeft},
-        {Kinect.JointType.KneeLeft, Kinect.JointType.HipLeft},
-        {Kinect.JointType.HipLeft, Kinect.JointType.SpineBase},
-        {Kinect.JointType.FootRight, Kinect.JointType.AnkleRight},
-        {Kinect.JointType.AnkleRight, Kinect.JointType.KneeRight},
-        {Kinect.JointType.KneeRight, Kinect.JointType.HipRight},
-        {Kinect.JointType.HipRight, Kinect.JointType.SpineBase},
-        {Kinect.JointType.HandTipLeft, Kinect.JointType.HandLeft},
-        {Kinect.JointType.ThumbLeft, Kinect.JointType.HandLeft},
-        {Kinect.JointType.HandLeft, Kinect.JointType.WristLeft},
-        {Kinect.JointType.WristLeft, Kinect.JointType.ElbowLeft},
-        {Kinect.JointType.ElbowLeft, Kinect.JointType.ShoulderLeft},
-        {Kinect.JointType.ShoulderLeft, Kinect.JointType.SpineShoulder},
-        {Kinect.JointType.HandTipRight, Kinect.JointType.HandRight},
-        {Kinect.JointType.ThumbRight, Kinect.JointType.HandRight},
-        {Kinect.JointType.HandRight, Kinect.JointType.WristRight},
-        {Kinect.JointType.WristRight, Kinect.JointType.ElbowRight},
-        {Kinect.JointType.ElbowRight, Kinect.JointType.ShoulderRight},
-        {Kinect.JointType.ShoulderRight, Kinect.JointType.SpineShoulder},
-        {Kinect.JointType.SpineBase, Kinect.JointType.SpineMid},
-        {Kinect.JointType.SpineMid, Kinect.JointType.SpineShoulder},
-        {Kinect.JointType.SpineShoulder, Kinect.JointType.Neck},
-        {Kinect.JointType.Neck, Kinect.JointType.Head},
-    };
-
-    #endregion
 
     private void Start()
     {
@@ -90,6 +59,12 @@ public class KinectInput : MonoBehaviour
         kinectSensor = null;
     }
 
+    // 1 unit is about 3 feet.
+    private bool IsBodyWithinRange(Body body)
+    {
+        return body.Joints[Kinect.JointType.SpineMid].Position.Z < (maxDistanceForPlayer / 3f);
+    }
+
     private void Update()
     {
         // initiate the reader if we haven't already and grab bodies that we see
@@ -115,7 +90,6 @@ public class KinectInput : MonoBehaviour
             return;
         }
 
-        // find which body is player 1 and which is player 2
         List<ulong> trackedIds = new List<ulong>();
         foreach (var body in bodyData)
         {
@@ -124,7 +98,7 @@ public class KinectInput : MonoBehaviour
                 continue;
             }
 
-            if (body.IsTracked)
+            if (body.IsTracked && IsBodyWithinRange(body))
             {
                 trackedIds.Add(body.TrackingId);
             }
@@ -159,7 +133,7 @@ public class KinectInput : MonoBehaviour
                 continue;
             }
 
-            if (body.IsTracked)
+            if (body.IsTracked && IsBodyWithinRange(body))
             {
                 if (!bodies.ContainsKey(body.TrackingId))
                 {
